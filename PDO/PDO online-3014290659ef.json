@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "pdo-online",
+  "private_key_id": "3014290659efcafe254221a2c1d84bb2bcccbd3f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDQiG7OVckH4Y9\nvDFwS9xT2ZK+bFdw8UlXETvt1dLA3tGIxUuBfgHZtkAORr1WhWYq2quXOD4I0KDv\nmA7UCyKehgweEbKlU9KbabPMoQqVPN2UmkFnVmSrri3Oji+ryhL40iWapX4tPuPy\nTuSXVBqcdBgBrRylZHHdSsBm/ug4pfrhNWz52zaddZvBNxstmtVmDitM2cmxt+cB\nYzbpntr+RuRA3JjyW9KnHDXRVp0wvgMvckv/cJDDIZgz2k003GKNJDsXoMHYc3St\nXPnWfBgEQ9zvORzHwl84NJJjlr63ogaL/5p/zXH9uBl//yJJov+mnlrAGzM9P0Er\n57XtqiB5AgMBAAECggEALDFekxJyT6G272gVxHXXAz9eQC0jSVPDJqqm5ribf72u\nrQcChOdxIcZnDxQhrGB69D4T0iEPoU0e77t5t7JhfoGWYoPc7CBhrX0qDalxTL++\n4vBa1zmthVHh2jtCPN56lshxbGQCf9kZHHGQuVN2xmxcNpzou+JVByHxFB6jjpZV\nSM4V4Y8B05y96dvzWvk7Pt4ijQYlLVCR0a66wk3Bzm2ngS/HuGz1Z/QYDtGhGZWg\n70tn3suoPcSsFxsDLSNqGop5/ijgKVxIbwnVqb15sbtqusDR9PJpW8wwPjuifAlj\nIAdT8VZXANKssuolXT6uOOJjPZAECx8TppKfpzhqkQKBgQDlvmuZ7XJD2U1y2SpI\n/BqaIOoqy/ORic8zK+R5Qc9+1SK0ELJE02hnQtYzCNxcKsiFOk2pOYU11oFeC4Gb\n2qhyOpAMbCBp3wxpQ2WqpaEfJsC1ujR34xZjRmvbfLH52l8wboOZMaMw6embczeh\nfFmcUV2q81u0L9SLjUR4Q5uHZQKBgQDZksZB2zCTCcTlMJLvhHQyxuucNbU31lkk\nLztAUkieWFYVqgH2OrnP/q3xeVnt/MgtvWz/y27d4HooG9UAzzCwnv2osi7KSuQW\nl5OTZ68paSbGqIoGdhsBPUPAeSoIk4icaWpVIx3frt2Ids2J9ad+BczB0aC7Cqus\n8c2bfGOVhQKBgGa1mb9II0Rn+rL0mW3lnzL2shmN8odHN+Wlos/+9ve563ja2gfh\nB5TakY5hULq3ucuuBBg6ie5GxrE3raryt0nSGqIjGN6cBB1vLx16TKzzk0XrSBes\n405gpkmK1rpfwRyS26x6P33XpUOE4AMG57z1t0183KuSkpANCOZHO1ntAoGAWvGx\nEWIPocaZmLt/D8Mr1vWzEm6YuyhLxoY/nBlI5XdDNHcFrujJNpncF22EG6hn/EaL\nwzhDtVbZeN55YIc6cPlkShmA2WoIgTEGrLzQSNz9KljUqPLBQvla0p9S5JbWqZqe\nqcut9wve6eXO8HXQdyrxdaqsJsLFE9tW+EE8VwkCgYEA2XDy0CGzuK5eOl6Gs/sH\nDyL42C+oXmTJ9U6S9YkbLAhi+IW64YS1mEqn7TIKRTaisIwOro2QKobSGMJcSf8p\nqsSxO11x0l27adScoUw8H6IZcxDEQwd8cHQ5uh4NnnyzEUywMMlzHRAbYb6aKXgr\n4tJiAa2dYMmj9riaF1EOd3o=\n-----END PRIVATE KEY-----\n",
+  "client_email": "adnan-673@pdo-online.iam.gserviceaccount.com",
+  "client_id": "113207331597438315751",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/adnan-673%40pdo-online.iam.gserviceaccount.com"
+}
