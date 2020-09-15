@@ -19,6 +19,7 @@ class PdonlineSpider(scrapy.Spider):
     def start_requests(self):
 
         self.pause_scraping = False
+        self.dynamic_cookie = dict()
         """
         input_data = list()
         google_sheet_id =  "1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA"
@@ -36,8 +37,7 @@ class PdonlineSpider(scrapy.Spider):
 
         
         if True: # input_data
-            yield scrapy.Request(url=urls, callback=self.search_result, meta={"Cookie_trick" : list(),  "input_data": list()})
-            # yield scrapy.Request(url=urls, callback=self.search_result, meta={"Cookie_trick" : list(),  "input_data": input_data.pop()})
+            yield scrapy.Request(url=urls, callback=self.search_result, meta={"input_data": list(), "current_url":urls})
 
     def search_result(self, response):
         if "Default.aspx" in response.url:
@@ -55,9 +55,25 @@ class PdonlineSpider(scrapy.Spider):
                                    request, cookie_bytes)
                     cookie_unicode = cookie_bytes.decode("latin1", errors="replace")
                 cookie_list_unicode.append(cookie_unicode)
-                dynamic_cookie[ cookie_unicode.split("=")[0] ] = cookie_unicode.split("=")[1]
-
+                list_temp = cookie_unicode.split("=")
+                name = list_temp.pop(0)
+                value = "=".join(list_temp)
+                self.dynamic_cookie[ name ] = value
             form_data = dict()
+            input_fields = response.css("form input")
+            for ifield in input_fields:
+                if ifield.css("input::attr(value)").extract_first() == None:
+                    form_data[ifield.css("input::attr(name)").extract_first()] = ''
+                elif ifield.css("input::attr(value)").extract_first() == 'I Disagree':
+                    continue
+                elif ifield.css("input::attr(value)").extract_first() == '':
+                    form_data[ifield.css("input::attr(name)").extract_first()] = ''
+                else:
+                    form_data[ifield.css("input::attr(name)").extract_first()] = ifield.css("input::attr(value)").extract_first()
+            
+            yield FormRequest(url=response.meta["current_url"], formdata=form_data, callback=self.search_result, meta={"input_data": list(), "current_url":response.meta["current_url"]})
+
+
     
     def submit_form(self, response):
         self.pause_scraping = False
