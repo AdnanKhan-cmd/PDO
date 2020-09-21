@@ -4,6 +4,7 @@ import sys
 import pandas as pd
 from scrapy.http import FormRequest
 from scrapy.utils.response import open_in_browser
+import json
 
 if sys.version_info[0] < 3: 
     from StringIO import StringIO
@@ -98,35 +99,35 @@ class PdonlineSpider(scrapy.Spider):
                 if key == "Suburb":
                     form_data["ctl00$MainContent$SuburbCombo"] = response.meta["input_data"][key]
                 elif key == "Street Name":
-                    street_name_define = {"logEntries":[],"value":"","text":"","enabled":true,"checkedIndices":[],"checkedItemsTextOverflows":false}
+                    street_name_define = {"logEntries":[],"value":"","text":"","enabled":True,"checkedIndices":[],"checkedItemsTextOverflows":False}
                     street_name_define["value"] = response.meta["input_data"][key]
                     street_name_define["text"] =response.meta["input_data"][key]
                     form_data["ctl00_MainContent_StreetCombo_ClientState"] = street_name_define
                     form_data["ctl00$MainContent$StreetCombo"] = response.meta["input_data"][key]
                 elif key == "Unit Number From": 
                     form_data["ctl00$MainContent$FromUnitNumberTextBox"] = response.meta["input_data"][key]
-                    ctl00_MainContent_FromUnitNumberTextBox_ClientState = {"enabled":true,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
+                    ctl00_MainContent_FromUnitNumberTextBox_ClientState = {"enabled":True,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
                     ctl00_MainContent_FromUnitNumberTextBox_ClientState["validationText"] = response.meta["input_data"][key]
                     ctl00_MainContent_FromUnitNumberTextBox_ClientState["valueAsString"] = response.meta["input_data"][key]
                     ctl00_MainContent_FromUnitNumberTextBox_ClientState["lastSetTextBoxValue"] = response.meta["input_data"][key]
                     form_data["ctl00_MainContent_FromUnitNumberTextBox_ClientState"] = ctl00_MainContent_FromUnitNumberTextBox_ClientState
                 elif key == "Unit Number To":
                     form_data["ctl00$MainContent$ToUnitNumberTextBox"] = response.meta["input_data"][key]
-                    ctl00_MainContent_ToUnitNumberTextBox_ClientState = {"enabled":true,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
+                    ctl00_MainContent_ToUnitNumberTextBox_ClientState = {"enabled":True,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
                     ctl00_MainContent_ToUnitNumberTextBox_ClientState["validationText"] = response.meta["input_data"][key]
                     ctl00_MainContent_ToUnitNumberTextBox_ClientState["valueAsString"] = response.meta["input_data"][key]
                     ctl00_MainContent_ToUnitNumberTextBox_ClientState["lastSetTextBoxValue"] = response.meta["input_data"][key]
                     form_data["ctl00_MainContent_ToUnitNumberTextBox_ClientState"] = ctl00_MainContent_ToUnitNumberTextBox_ClientState
                 elif key == "Street Number From":
                     form_data["ctl00$MainContent$FromStreetNumberTextBox"] = response.meta["input_data"][key]
-                    ctl00_MainContent_FromStreetNumberTextBox_ClientState = {"enabled":true,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
+                    ctl00_MainContent_FromStreetNumberTextBox_ClientState = {"enabled":True,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
                     ctl00_MainContent_FromStreetNumberTextBox_ClientState["validationText"] = response.meta["input_data"][key]
                     ctl00_MainContent_FromStreetNumberTextBox_ClientState["valueAsString"] = response.meta["input_data"][key]
                     ctl00_MainContent_FromStreetNumberTextBox_ClientState["lastSetTextBoxValue"] = response.meta["input_data"][key]
                     form_data["ctl00_MainContent_FromStreetNumberTextBox_ClientState"] = ctl00_MainContent_FromStreetNumberTextBox_ClientState
                 elif key == "Street Number To":
                     form_data["ctl00$MainContent$ToStreetNumberTextBox"] = response.meta["input_data"][key]
-                    ctl00_MainContent_ToStreetNumberTextBox_ClientState = {"enabled":true,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
+                    ctl00_MainContent_ToStreetNumberTextBox_ClientState = {"enabled":True,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
                     ctl00_MainContent_ToStreetNumberTextBox_ClientState["validationText"] = response.meta["input_data"][key]
                     ctl00_MainContent_ToStreetNumberTextBox_ClientState["valueAsString"] = response.meta["input_data"][key]
                     ctl00_MainContent_ToStreetNumberTextBox_ClientState["lastSetTextBoxValue"] = response.meta["input_data"][key]
@@ -134,13 +135,13 @@ class PdonlineSpider(scrapy.Spider):
 
                 elif key == "Plan Number":
                     form_data["ctl00$MainContent$PlanTextBox"] = response.meta["input_data"][key]
-                    ctl00_MainContent_PlanTextBox_ClientState = {"enabled":true,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
+                    ctl00_MainContent_PlanTextBox_ClientState = {"enabled":True,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
                     ctl00_MainContent_PlanTextBox_ClientState["validationText"] = response.meta["input_data"][key]
                     ctl00_MainContent_PlanTextBox_ClientState["valueAsString"] = response.meta["input_data"][key]
                     ctl00_MainContent_PlanTextBox_ClientState["lastSetTextBoxValue"] = response.meta["input_data"][key]
                 elif key == "Lot Number":
                     form_data["ctl00$MainContent$LotTextBox"] = response.meta["input_data"][key]
-                    ctl00_MainContent_LotTextBox_ClientState = {"enabled":true,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
+                    ctl00_MainContent_LotTextBox_ClientState = {"enabled":True,"emptyMessage":"","validationText":"","valueAsString":"","lastSetTextBoxValue":""}
                     ctl00_MainContent_LotTextBox_ClientState["validationText"] = response.meta["input_data"][key]
                     ctl00_MainContent_LotTextBox_ClientState["valueAsString"] = response.meta["input_data"][key]
                     ctl00_MainContent_LotTextBox_ClientState["lastSetTextBoxValue"] = response.meta["input_data"][key]
@@ -150,6 +151,12 @@ class PdonlineSpider(scrapy.Spider):
                 form_data["ctl00$RadScriptManager1"] = "ctl00$MainContent$ctl00$MainContent$SearchPanelPanel|ctl00$MainContent$btnSearch"
                 form_data["ctl00_RadScriptManager1_TSM"] = ";;System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35:en-US:16997a38-7253-4f67-80d9-0cbcc01b3057:ea597d4b:b25378d2;Telerik.Web.UI, Version=2020.2.617.35, Culture=neutral, PublicKeyToken=121fae78165ba3d4:en-US:652a635d-78ca-4fc5-989f-3396e0ef31ee:16e4e7cd:ed16cbdc:f7645509:88144a7a:24ee1bba:33715776:e330518b:1e771326:8e6f0d33:1f3a7489:4877f69a:b2e06756:92fe8ea0:fa31b949:c128760b:19620875:874f8ea2:f46195d3:490a9d4e:bd8f85e4:2003d0b8:aa288e2d:258f1c72:b7778d6c;"
                 form_data["ctl00_MainContent_RadTabStrip1_ClientState"] = {"selectedIndexes":["0"],"logEntries":[],"scrollState":{}}
+            for key in form_data:
+                if isinstance(form_data[key], dict):
+                    form_data[key] = json.dumps(form_data[key])
+                if not isinstance(form_data[key], str):
+                    form_data[key] = str(form_data[key])
+            yield FormRequest(url=response.meta["current_url"], formdata=form_data, callback=self.search_result, meta={"input_data": list(), "current_url":response.meta["current_url"]})
             yield FormRequest(url=response.meta["current_url"], formdata=form_data, callback=self.search_result, meta={"input_data": list(), "current_url":response.meta["current_url"]})
 
     
