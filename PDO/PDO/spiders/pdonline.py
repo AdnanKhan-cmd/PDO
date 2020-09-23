@@ -96,6 +96,7 @@ class PdonlineSpider(scrapy.Spider):
                     form_data[ifield.css("input::attr(name)").extract_first()] = ifield.css("input::attr(value)").extract_first()
             for key in response.meta["input_data"]:
                 #  if response.meta["input_data"][key]:
+                
                 if key == "Suburb":
                     form_data["ctl00$MainContent$SuburbCombo"] = response.meta["input_data"][key]
                 elif key == "Street Name":
@@ -151,6 +152,20 @@ class PdonlineSpider(scrapy.Spider):
                 form_data["ctl00$RadScriptManager1"] = "ctl00$MainContent$ctl00$MainContent$SearchPanelPanel|ctl00$MainContent$btnSearch"
                 form_data["ctl00_RadScriptManager1_TSM"] = ";;System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35:en-US:16997a38-7253-4f67-80d9-0cbcc01b3057:ea597d4b:b25378d2;Telerik.Web.UI, Version=2020.2.617.35, Culture=neutral, PublicKeyToken=121fae78165ba3d4:en-US:652a635d-78ca-4fc5-989f-3396e0ef31ee:16e4e7cd:ed16cbdc:f7645509:88144a7a:24ee1bba:33715776:e330518b:1e771326:8e6f0d33:1f3a7489:4877f69a:b2e06756:92fe8ea0:fa31b949:c128760b:19620875:874f8ea2:f46195d3:490a9d4e:bd8f85e4:2003d0b8:aa288e2d:258f1c72:b7778d6c;"
                 form_data["ctl00_MainContent_RadTabStrip1_ClientState"] = {"selectedIndexes":["0"],"logEntries":[],"scrollState":{}}
+            
+            try:
+                form_data.pop("ctl00_RadWindow1_C_CMSSection_EditWindow_ClientState, None")
+            except:
+                pass
+            try:
+                form_data.pop("ctl00_RadWindow1_C_CMSSection_RadWindowManager1_ClientState, None")
+            except:
+                pass
+            try:
+                form_data.pop("ctl00$RadWindow1$C$btnNo, None")
+            except:
+                pass
+
             for key in form_data:
                 if isinstance(form_data[key], dict):
                     form_data[key] = json.dumps(form_data[key])
