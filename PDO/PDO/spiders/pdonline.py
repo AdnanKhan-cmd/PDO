@@ -12,6 +12,10 @@ else:
     from io import StringIO
 
 
+def url_genrate(url):
+    return "http://localhost:8050/render.html?url=%s&imeout=90&wait=3" % url
+
+
 class PdonlineSpider(scrapy.Spider):
     name = 'pdonline'
     # allowed_domains = ['pdonline.brisbane.gld.gov.au']
@@ -23,7 +27,39 @@ class PdonlineSpider(scrapy.Spider):
         self.dynamic_cookie = dict()
         
         self.input_data = list()
-        yield scrapy.Request(url="https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx", cookies=self.dynamic_cookie, callback=self.search_result, meta={"input_data": {'Lot Number':'', 'Plan Number': '', 'Unit Number To':'', 'Unit Number From':'', 'Street Name': 'Mcconaghy St', 'Street Number From': 92, 'Street Number To': 92, 'Suburb': 'Mitchelton'}, "current_url":"https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx"})
+        yield FormRequest(
+            # url="http://0.0.0.0:8050",
+            url="https://enuoaw1oha7wh2x.m.pipedream.net",
+            callback=self.search_result,
+            formdata={
+                'url': 'https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx',
+            },
+            headers={
+                'Content-Type': 'application/json',
+                'accept': '/',
+                }
+
+        )
+        '''
+        yield scrapy.Request(
+            url=url_genrate("https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx"),
+            cookies=self.dynamic_cookie,
+            callback=self.search_result,
+            meta={
+                "input_data":{
+                    'Lot Number':'', 
+                    'Plan Number': '', 
+                    'Unit Number To':'', 
+                    'Unit Number From':'', 
+                    'Street Name': 'Mcconaghy St', 
+                    'Street Number From': 92, 
+                    'Street Number To': 92, 
+                    'Suburb': 'Mitchelton'
+                    }, 
+                "current_url":"https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx"
+                }
+            )
+        '''
         """
         google_sheet_id =  "1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA" # https://docs.google.com/spreadsheets/d/1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA/edit?usp=sharing
         try:
@@ -46,8 +82,7 @@ class PdonlineSpider(scrapy.Spider):
             yield scrapy.Request(url=urls, cookies=self.dynamic_cookie, callback=self.search_result, meta={"input_data": self.input_data.pop(), "current_url":urls})
         """
     def search_result(self, response):
-        if "Default.aspx" in response.url:
-            self.pause_scraping = True
+        if response.css("#ctl00_RadWindow1_C_btnOk"):
             cookie_header = (response.request.headers.get('Cookie')) # Cookie utf-8 to string
             if not cookie_header:
                 return []
