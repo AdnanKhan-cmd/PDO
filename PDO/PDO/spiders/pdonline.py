@@ -35,39 +35,12 @@ function main(splash)
 end
 """
 
-def url_genrate(url):
-    return "http://localhost:8050/render.html?url=%s&imeout=90&wait=3" % url
-
-
 class PdonlineSpider(scrapy.Spider):
     name = 'pdonline'
-    # allowed_domains = ['pdonline.brisbane.gld.gov.au']
-    # start_urls = ['http://pdonline.brisbane.gld.gov.au/']
 
     def start_requests(self):
 
-        self.pause_scraping = False
-        self.dynamic_cookie = dict()
-        
-        self.input_data = list()
 
-        lua_request = '''
-            function main(splash)
-            local url = splash.args.url
-            assert(splash:go(url))
-            assert(splash:wait(0.5))
-            local entries = splash:history()
-            local last_response = entries[#entries].response
-            return {
-                url = splash:url(),
-                headers = last_response.headers,
-                http_status = last_response.status,
-                cookies = splash:get_cookies(),
-                html = splash:html(),
-            }
-            end
-            '''
-    
         yield SplashRequest(
             url="https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx",
             # cookies=self.dynamic_cookie,
@@ -95,6 +68,8 @@ class PdonlineSpider(scrapy.Spider):
                 }
             )
 
+        # Commented below section is about google sheet reading etc.
+
         """
         google_sheet_id =  "1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA" # https://docs.google.com/spreadsheets/d/1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA/edit?usp=sharing
         try:
@@ -116,38 +91,11 @@ class PdonlineSpider(scrapy.Spider):
         if self.input_data: # input_data
             yield scrapy.Request(url=urls, cookies=self.dynamic_cookie, callback=self.search_result, meta={"input_data": self.input_data.pop(), "current_url":urls})
         """
+    
+
     def search_result(self, response):
         if response.css("#ctl00_RadWindow1_C_btnOk"):
-            '''
-            for temp_cookies_handling in response.data["cookies"]:
-                self.dynamic_cookie[temp_cookies_handling["name"]] = temp_cookies_handling["value"]
-            
-            cookie_header = (response.request.headers.get('Cookie')) # Cookie utf-8 to string
-            if not cookie_header:
-                return []
-            cookie_gen_bytes = (s.strip() for s in cookie_header.split(b";"))
-            cookie_list_unicode = []
-            for cookie_bytes in cookie_gen_bytes:
-                try:
-                    cookie_unicode = cookie_bytes.decode("utf8")
-                except UnicodeDecodeError:
-                    logger.warning("Non UTF-8 encoded cookie found in request %s: %s",
-                                   request, cookie_bytes)
-                    cookie_unicode = cookie_bytes.decode("latin1", errors="replace")
-                cookie_list_unicode.append(cookie_unicode)
-                list_temp = cookie_unicode.split("=")
-                name = list_temp.pop(0)
-                value = "=".join(list_temp)
-                self.dynamic_cookie[ name ] = value
-            for cookie_custom in self.dynamic_cookie:
-                
-                lua_request = lua_request + """
-                splash:add_cookie('%s','%s')
-                """ % (cookie_custom, self.dynamic_cookie[cookie_custom])
 
-
-            lua_request = lua_request +"""
-            '''
             form_data = dict()
             input_fields = response.css("form input")
             for ifield in input_fields:
@@ -161,15 +109,6 @@ class PdonlineSpider(scrapy.Spider):
                     form_data[ifield.css("input::attr(name)").extract_first()] = ''
                 else:
                     form_data[ifield.css("input::attr(name)").extract_first()] = ifield.css("input::attr(value)").extract_first()
-            lua_request = """
-                function main(splash, args)
-                splash:init_cookies(splash.args.cookies)
-                assert(splash:go(args.url))
-                return {
-                    html = splash:html(),
-                }
-                end
-                """
 
             yield SplashFormRequest(
                 url='https://pdonline.brisbane.qld.gov.au/MasterPlan/Default.aspx', 
