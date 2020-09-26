@@ -5,12 +5,35 @@ import pandas as pd
 from scrapy.http import FormRequest
 from scrapy.utils.response import open_in_browser
 import json
+from scrapy_splash import SplashRequest, SplashFormRequest
 
 if sys.version_info[0] < 3: 
     from StringIO import StringIO
 else:
     from io import StringIO
 
+script = """
+function main(splash)
+  splash:init_cookies(splash.args.cookies)
+  assert(splash:go{
+    splash.args.url,
+    headers=splash.args.headers,
+    http_method=splash.args.http_method,
+    body=splash.args.body,
+    })
+  assert(splash:wait(0.5))
+
+  local entries = splash:history()
+  local last_response = entries[#entries].response
+  return {
+    url = splash:url(),
+    headers = last_response.headers,
+    http_status = last_response.status,
+    cookies = splash:get_cookies(),
+    html = splash:html(),
+  }
+end
+"""
 
 def url_genrate(url):
     return "http://localhost:8050/render.html?url=%s&imeout=90&wait=3" % url
@@ -27,24 +50,36 @@ class PdonlineSpider(scrapy.Spider):
         self.dynamic_cookie = dict()
         
         self.input_data = list()
-        yield FormRequest(
-            # url="http://0.0.0.0:8050",
-            url="https://enuoaw1oha7wh2x.m.pipedream.net",
-            callback=self.search_result,
-            formdata={
-                'url': 'https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx',
-            },
-            headers={
-                'Content-Type': 'application/json',
-                'accept': '/',
-                }
 
-        )
-        '''
-        yield scrapy.Request(
-            url=url_genrate("https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx"),
-            cookies=self.dynamic_cookie,
+        lua_request = '''
+            function main(splash)
+            local url = splash.args.url
+            assert(splash:go(url))
+            assert(splash:wait(0.5))
+            local entries = splash:history()
+            local last_response = entries[#entries].response
+            return {
+                url = splash:url(),
+                headers = last_response.headers,
+                http_status = last_response.status,
+                cookies = splash:get_cookies(),
+                html = splash:html(),
+            }
+            end
+            '''
+    
+        yield SplashRequest(
+            url="https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx",
+            # cookies=self.dynamic_cookie,
             callback=self.search_result,
+            endpoint='execute',
+            cache_args=['lua_source'],
+            args={
+                'timeout': '90',
+                'wait': '30',
+                'lua_source': script,
+            },
+            session_id='1',
             meta={
                 "input_data":{
                     'Lot Number':'', 
@@ -59,7 +94,7 @@ class PdonlineSpider(scrapy.Spider):
                 "current_url":"https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx"
                 }
             )
-        '''
+
         """
         google_sheet_id =  "1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA" # https://docs.google.com/spreadsheets/d/1ItXlYbNKUh9buALC-3WObEFJIrXILlCiRBIUJHvX3AA/edit?usp=sharing
         try:
@@ -83,6 +118,10 @@ class PdonlineSpider(scrapy.Spider):
         """
     def search_result(self, response):
         if response.css("#ctl00_RadWindow1_C_btnOk"):
+            '''
+            for temp_cookies_handling in response.data["cookies"]:
+                self.dynamic_cookie[temp_cookies_handling["name"]] = temp_cookies_handling["value"]
+            
             cookie_header = (response.request.headers.get('Cookie')) # Cookie utf-8 to string
             if not cookie_header:
                 return []
@@ -100,6 +139,15 @@ class PdonlineSpider(scrapy.Spider):
                 name = list_temp.pop(0)
                 value = "=".join(list_temp)
                 self.dynamic_cookie[ name ] = value
+            for cookie_custom in self.dynamic_cookie:
+                
+                lua_request = lua_request + """
+                splash:add_cookie('%s','%s')
+                """ % (cookie_custom, self.dynamic_cookie[cookie_custom])
+
+
+            lua_request = lua_request +"""
+            '''
             form_data = dict()
             input_fields = response.css("form input")
             for ifield in input_fields:
@@ -113,8 +161,28 @@ class PdonlineSpider(scrapy.Spider):
                     form_data[ifield.css("input::attr(name)").extract_first()] = ''
                 else:
                     form_data[ifield.css("input::attr(name)").extract_first()] = ifield.css("input::attr(value)").extract_first()
-            # yield FormRequest(url="https://a5e2b30d7f61942f28ea0a18796b4020.m.pipedream.net", cookies=self.dynamic_cookie, formdata=form_data, callback=self.temp, meta={"input_data": response.meta["input_data"], "current_url":response.meta["current_url"]})
-            yield FormRequest(url=response.meta["current_url"], cookies=self.dynamic_cookie, formdata=form_data, callback=self.search_result, meta={"input_data": response.meta["input_data"], "current_url":response.meta["current_url"]})
+            lua_request = """
+                function main(splash, args)
+                splash:init_cookies(splash.args.cookies)
+                assert(splash:go(args.url))
+                return {
+                    html = splash:html(),
+                }
+                end
+                """
+
+            yield SplashFormRequest(
+                url='https://pdonline.brisbane.qld.gov.au/MasterPlan/Default.aspx', 
+                formdata=form_data,
+                callback=self.search_result,
+                endpoint='execute',
+                args={
+                    'timeout': '90',
+                    'wait': '30',
+                    'lua_source': script,
+                },
+                session_id='1'
+                )
         else:
             form_data = dict()
             input_fields = response.css("form input")
