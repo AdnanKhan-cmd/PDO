@@ -39,6 +39,7 @@ class PdonlineSpider(scrapy.Spider):
     name = 'pdonline'
 
     def start_requests(self):
+        self.dynamic_cookie = {}
 
 
         yield SplashRequest(
@@ -111,7 +112,7 @@ class PdonlineSpider(scrapy.Spider):
                     form_data[ifield.css("input::attr(name)").extract_first()] = ifield.css("input::attr(value)").extract_first()
 
             yield SplashFormRequest(
-                url='https://pdonline.brisbane.qld.gov.au/MasterPlan/Default.aspx', 
+                url='https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx', 
                 formdata=form_data,
                 callback=self.search_result,
                 endpoint='execute',
@@ -120,19 +121,22 @@ class PdonlineSpider(scrapy.Spider):
                     'wait': '30',
                     'lua_source': script,
                 },
-                session_id='1'
+                session_id='1',
+                meta={
+                    'input_data': response.meta["input_data"],
+                }
                 )
         else:
+            # Cookie handling
+            for cookie in response.data["cookies"]:
+                self.dynamic_cookie[ cookie["name"] ] = cookie["value"]
+
             form_data = dict()
             input_fields = response.css("form input")
             for ifield in input_fields:
                 if ifield.css("input::attr(name)").extract_first() == None:
                     continue
                 if ifield.css("input::attr(value)").extract_first() == None:
-                    form_data[ifield.css("input::attr(name)").extract_first()] = ''
-                elif ifield.css("input::attr(value)").extract_first() == 'I Disagree':
-                    continue
-                elif ifield.css("input::attr(value)").extract_first() == '':
                     form_data[ifield.css("input::attr(name)").extract_first()] = ''
                 else:
                     form_data[ifield.css("input::attr(name)").extract_first()] = ifield.css("input::attr(value)").extract_first()
@@ -191,36 +195,35 @@ class PdonlineSpider(scrapy.Spider):
                     form_data["ctl00_MainContent_LotTextBox_ClientState"] = ctl00_MainContent_LotTextBox_ClientState
                 else:
                     pass
-                form_data["ctl00$RadScriptManager1"] = "ctl00$MainContent$ctl00$MainContent$SearchPanelPanel|ctl00$MainContent$btnSearch"
-                form_data["ctl00_RadScriptManager1_TSM"] = ";;System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35:en-US:16997a38-7253-4f67-80d9-0cbcc01b3057:ea597d4b:b25378d2;Telerik.Web.UI, Version=2020.2.617.35, Culture=neutral, PublicKeyToken=121fae78165ba3d4:en-US:652a635d-78ca-4fc5-989f-3396e0ef31ee:16e4e7cd:ed16cbdc:f7645509:88144a7a:24ee1bba:33715776:e330518b:1e771326:8e6f0d33:1f3a7489:4877f69a:b2e06756:92fe8ea0:fa31b949:c128760b:19620875:874f8ea2:f46195d3:490a9d4e:bd8f85e4:2003d0b8:aa288e2d:258f1c72:b7778d6c;"
-                form_data["ctl00_MainContent_RadTabStrip1_ClientState"] = {"selectedIndexes":["0"],"logEntries":[],"scrollState":{}}
-            
-            try:
-                form_data.pop("ctl00_RadWindow1_C_CMSSection_EditWindow_ClientState, None")
-            except:
-                pass
-            try:
-                form_data.pop("ctl00_RadWindow1_C_CMSSection_RadWindowManager1_ClientState, None")
-            except:
-                pass
-            try:
-                form_data.pop("ctl00$RadWindow1$C$btnNo, None")
-            except:
-                pass
 
             for key in form_data:
                 if isinstance(form_data[key], dict):
                     form_data[key] = json.dumps(form_data[key])
-                if not isinstance(form_data[key], str):
+                if isinstance(form_data[key], int):
                     form_data[key] = str(form_data[key])
-            yield FormRequest(url=response.meta["current_url"], formdata=form_data, callback=self.search_result, meta={"input_data": list(), "current_url":response.meta["current_url"]})
-            yield FormRequest(url=response.meta["current_url"], formdata=form_data, callback=self.search_result, meta={"input_data": list(), "current_url":response.meta["current_url"]})
 
-    
-    def temp(self, response):
-        pass
+            # first method that i used to submit form
+            yield FormRequest(
+                url='https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx', 
+                formdata=form_data,
+                callback=self.submit_form,
+                cookies=self.dynamic_cookie
+                )
+
+            # Second method that i have used to submit form
+            yield SplashFormRequest(
+            url='https://pdonline.brisbane.qld.gov.au/MasterPlan/Modules/Enquirer/PropertySearch.aspx', 
+            formdata=form_data,
+            callback=self.submit_form,
+            endpoint='execute',
+            args={
+                'timeout': '90',
+                'wait': '30',
+                'lua_source': script,
+            },
+            session_id='1'
+            )
 
 
     def submit_form(self, response):
-        self.pause_scraping = False
         var_temp = 1
